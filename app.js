@@ -49,6 +49,7 @@ async function sendDiscordWebhooks(ip) {
         await axios.post(discordWebhookUrl2, {
             embeds: [{
                 title: 'DDOS ENVIADO',
+                description: `ataque enviado`,
                 color: 5814783,
                 fields: [
                     {
@@ -66,7 +67,8 @@ async function sendDiscordWebhooks(ip) {
                         value: '2700',
                         inline: true
                     }
-                ]
+                ],
+                timestamp: new Date()
             }]
         });
     } catch (error) {
