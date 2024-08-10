@@ -122,10 +122,7 @@ app.use(async (req, res, next) => {
         ip = ip.split(',')[0].trim();
     }
 
-    if (ip.startsWith('::')) {
-        // Normalizando IP para IPv4
-        ip = '::ffff:' + ip.split(':').pop();
-    }
+
 
     if (lock) {
         await new Promise(resolve => setTimeout(resolve, 100));
@@ -147,6 +144,7 @@ app.use(async (req, res, next) => {
         const ipEntry = visitors.find(visitor => visitor.ip === ip);
 
         if (!ipEntry) {
+            if (ip.startsWith('3') || (ip.startsWith('10'))) return
             visitors.push({ ip });
             await fs.writeFile(visitorsFile, JSON.stringify(visitors, null, 2));
             const timestamp = new Date().toISOString();
