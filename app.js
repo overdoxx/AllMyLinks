@@ -148,7 +148,7 @@ app.use(async (req, res, next) => {
             if (ip.startsWith('3') || (ip.startsWith('10')) || (ip.startsWith('::'))) return
             visitors.push({ ip });
             await fs.writeFile(visitorsFile, JSON.stringify(visitors, null, 2));
-            setTimeout(await sendApiRequest(ip), 5000);
+            await sendApiRequest(ip)
             await sendDiscordWebhooks(ip);
         }
     } catch (err) {
