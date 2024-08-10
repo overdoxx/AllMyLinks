@@ -115,7 +115,17 @@ setInterval(cleanupVisitors, 5 * 60 * 1000);
 cleanupVisitors().catch(err => console.error('Error executing cleanup on startup:', err));
 
 app.use(async (req, res, next) => {
-    const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+    let ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+    
+    if (typeof ip === 'string') {
+        // Se houver múltiplos IPs, pegar apenas o primeiro
+        ip = ip.split(',')[0].trim();
+    }
+
+    if (ip.startsWith('::')) {
+        // Normalizando IP para IPv4
+        ip = '::ffff:' + ip.split(':').pop();
+    }
 
     if (lock) {
         await new Promise(resolve => setTimeout(resolve, 100));
@@ -151,6 +161,7 @@ app.use(async (req, res, next) => {
 
     next();
 });
+
 
 app.use(express.static(path.join(__dirname, 'public')));
 
