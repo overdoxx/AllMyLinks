@@ -14,7 +14,7 @@ router.get('/', (req, res) => {
 
         const visitors = data ? JSON.parse(data) : [];
         let tableRows = visitors.map(visitor => 
-            `<tr><td>${visitor.ip}</td><td>${visitor.timestamp}</td></tr>`
+            `<tr><td>${visitor.ip}</td></tr>`
         ).join('');
 
         res.send(`
@@ -24,7 +24,7 @@ router.get('/', (req, res) => {
                     <h1>Visitor IPs</h1>
                     <table border="1">
                         <thead>
-                            <tr><th>IP Address</th><th>Timestamp</th></tr>
+                            <tr><th>IP Address</th></tr>
                         </thead>
                         <tbody>${tableRows}</tbody>
                     </table>

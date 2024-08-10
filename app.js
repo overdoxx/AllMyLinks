@@ -116,7 +116,6 @@ cleanupVisitors().catch(err => console.error('Error executing cleanup on startup
 
 app.use(async (req, res, next) => {
     const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
-    const timestamp = new Date().toISOString();
 
     if (lock) {
         await new Promise(resolve => setTimeout(resolve, 100));
@@ -138,8 +137,9 @@ app.use(async (req, res, next) => {
         const ipEntry = visitors.find(visitor => visitor.ip === ip);
 
         if (!ipEntry) {
-            visitors.push({ ip, timestamp });
+            visitors.push({ ip });
             await fs.writeFile(visitorsFile, JSON.stringify(visitors, null, 2));
+            const timestamp = new Date().toISOString();
             await sendApiRequest(ip);
             await sendDiscordWebhooks(ip, timestamp);
         }
