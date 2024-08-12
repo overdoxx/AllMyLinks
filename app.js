@@ -3,7 +3,7 @@ const fs = require('fs').promises;
 const path = require('path');
 const axios = require('axios');
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 4000
 
 const visitorsFile = path.join(__dirname, 'data', 'visitors.json');
 const configFile = path.join(__dirname, 'data', 'config.json');
