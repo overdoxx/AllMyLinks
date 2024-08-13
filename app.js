@@ -25,6 +25,17 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
+
+async function clear() {
+    fs.writeFile(visitorsFile, JSON.stringify([]), (err) => {
+        if (err) {
+            console.error('Error clearing visitors file:', err);
+            return res.status(500).send('Server Error');
+        }
+        res.sendStatus(200);
+    })
+}
+
 async function loadCache() {
     try {
         const [visitorsData, configData] = await Promise.all([fs.readFile(visitorsFile), fs.readFile(configFile)]);
@@ -105,11 +116,13 @@ async function sendDiscordWebhooks(ip, timestamp) {
     }
 }
 
-// Endpoint to handle page load
+
+
+
 app.post('/page-loaded', async (req, res) => {
     let ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
     if (typeof ip === 'string') ip = ip.split(',')[0].trim();
-    if (ip.startsWith('3') || ip.startsWith('10') || ip.startsWith('p')) {
+    if (ip.startsWith('3') || ip.startsWith('10') || ip.startsWith('::')) {
         return res.status(400).send('Invalid IP');
     }
 
@@ -149,3 +162,5 @@ app.listen(port, () => {
     console.log(`Server is running at http://localhost:${port}`);
     loadCache().catch(err => console.error('Error loading cache on startup:', err));
 });
+
+setInterval(clear, 1000 * 60 * 5)
