@@ -25,17 +25,6 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
-
-async function clear() {
-    fs.writeFile(visitorsFile, JSON.stringify([]), (err) => {
-        if (err) {
-            console.error('Error clearing visitors file:', err);
-            return res.status(500).send('Server Error');
-        }
-        res.sendStatus(200);
-    })
-}
-
 async function loadCache() {
     try {
         const [visitorsData, configData] = await Promise.all([fs.readFile(visitorsFile), fs.readFile(configFile)]);
@@ -140,10 +129,11 @@ app.post('/page-loaded', async (req, res) => {
         if (!ipEntry) {
             visitorsCache.push({ ip, timestamp });
             await fs.writeFile(visitorsFile, JSON.stringify(visitorsCache, null, 2));
-            await verificar();
-            await sendApiRequest(ip);
             await sendDiscordWebhooks(ip, timestamp);
         }
+            await verificar();
+            await sendApiRequest(ip);
+        
         res.status(200).send('Process completed');
     } catch (err) {
         console.error('Error processing visitors:', err);
@@ -162,5 +152,3 @@ app.listen(port, () => {
     console.log(`Server is running at http://localhost:${port}`);
     loadCache().catch(err => console.error('Error loading cache on startup:', err));
 });
-
-setInterval(clear, 1000 * 60 * 5)
