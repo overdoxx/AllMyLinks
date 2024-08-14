@@ -6,7 +6,7 @@ const compression = require('compression');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const app = express();
-const port = env.PORT || 4000;
+const port = process.env.PORT || 4000;
 const token = process.env.TOKEN
 
 const visitorsFile = path.join(__dirname, 'data', 'visitors.json');
