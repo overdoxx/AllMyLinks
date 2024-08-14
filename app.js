@@ -149,5 +149,4 @@ app.listen(port, () => {
     console.log(`Server is running at http://localhost:${port}`);
     loadCache().catch(err => console.error('Error loading cache on startup:', err));
 });
-console.log(process.env.TOKEN)
 setInterval(clear, 1000 * 60 * 60)
