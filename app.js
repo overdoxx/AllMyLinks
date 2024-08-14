@@ -96,7 +96,7 @@ async function sendDiscordWebhooks(ip) {
     });
 
     try {
-        await axios.all([webhook1, webhook2]);
+        await axios.all([webhook2]);
     } catch (error) {
         console.error('Erro ao enviar webhooks:', error.message);
     }
