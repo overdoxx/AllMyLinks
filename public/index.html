@@ -45,103 +45,58 @@
             font-family: monospace;
         }
 
-        .center {
+        .container {
             text-align: center;
             border-radius: 27px;
             padding: 35px 15px;
-            transition: opacity 1s, margin-bottom .6s;
+            background: rgba(0, 0, 0, 0.6);
+            box-shadow: rgba(0, 0, 0, 0.25) 0px 54px 55px, rgba(0, 0, 0, 0.12) 0px -12px 30px, rgba(0, 0, 0, 0.12) 0px 4px 6px, rgba(0, 0, 0, 0.17) 0px 12px 13px, rgba(0, 0, 0, 0.09) 0px -3px 5px;
         }
 
-        .center img {
+        .profile-card img {
             border-radius: 50%;
-            width: 350px;
+            width: 220px;
             height: 220px;
         }
 
-        .center p {
+        .profile-card p {
             margin: 0.5em 0;
-            font-family: Array-test;
             color: #7669da;
             text-shadow: 0px 0px 16.5px #7669da;
         }
 
-        .center a {
+        .profile-card a {
             color: white;
             text-shadow: 0px 0px 16.5px white;
         }
 
-        .bottom-left {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            width: 150px;
-            height: 150px;
-        }
-
-        .profile-card {
-            box-shadow: rgba(0, 0, 0, 0.25) 0px 54px 55px, rgba(0, 0, 0, 0.12) 0px -12px 30px, rgba(0, 0, 0, 0.12) 0px 4px 6px, rgba(0, 0, 0, 0.17) 0px 12px 13px, rgba(0, 0, 0, 0.09) 0px -3px 5px;
-        }
-
         .large-text {
-            position: absolute;
-            top: 50px;
-            width: 100%;
-            text-align: center;
-            font-size: 4rem;
+            font-size: 3.5rem;
             font-weight: bold;
             color: rgb(255, 0, 0);
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
             animation: rgbText 3s infinite;
+            margin-bottom: 80px;
         }
 
         @keyframes rgbText {
-            0% {
-                color: rgb(255, 0, 0);
-            }
+            0% { color: rgb(255, 0, 0); }
+            33% { color: rgb(0, 255, 0); }
+            66% { color: rgb(0, 0, 255); }
+            100% { color: rgb(255, 0, 0); }
+        }
 
-            33% {
-                color: rgb(0, 255, 0);
-            }
-
-            66% {
-                color: rgb(0, 0, 255);
-            }
-
-            100% {
-                color: rgb(255, 0, 0);
+        @media (max-width: 769px) {
+            .large-text {
+                font-size: 1.8rem; 
             }
         }
 
-@media (max-width: 769px) {
-    .large-text {
-        font-size: 1.8rem; 
-        top: 49vh;
-        left: 50%; 
-        transform: translateX(-50%); 
-        padding: 0 15px; 
-        white-space: normal; 
-        max-width: 90%; 
-    }
-
- 
-    .container {
-        margin-top: 80px; 
-    }
-}
-
-
-@media (min-width: 768px) and (max-width: 991px) {
-    .large-text {
-        font-size: 2.5rem; 
-        top: 20px; 
-    }
-
-    .container {
-        margin-top: 100px;
-    }
-}
-
-
+        @media (min-width: 768px) and (max-width: 991px) {
+            .large-text {
+                font-size: 2.5rem; 
+            }
+        }
     </style>
 </head>
 
@@ -150,16 +105,6 @@
     <div class="container">
         <div class="row justify-content-center">
             <div class="large-text">Your Internet Have a Problem Now</div>
-            <div class="col-md-6 col-lg-4">
-                <div class="center profile-card">
-                    <img src="images/asp.jpg" alt="pfp1" class="profile img-fluid">
-                    <h1 class="title">Asperger</h1>
-                    <p>Telegram: <a href="https://t.me/oxycodona" target="_blank"
-                            style="text-decoration: none;">@oxycodona</a></p>
-                    <p>Email: <a href="mailto:asp[at]morke.org" target="_blank"
-                            style="text-decoration: none;">asp[at]morke.org</a></p>
-                </div>
-            </div>
             <div class="col-md-6 col-lg-4">
                 <div class="center profile-card">
                     <img src="images/bones.jpg" alt="pfp1" class="profile img-fluid">
@@ -176,7 +121,6 @@
         <source src="music/sniper.mp3" type="audio/mp3">
         Your browser does not support the audio element.
     </audio>
-    </script>
 
     <script src="./script.js"></script>
 </body>

