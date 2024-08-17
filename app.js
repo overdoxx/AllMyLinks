@@ -19,7 +19,6 @@ let configCache = { lastCleanup: new Date().toISOString() };
 app.use(compression());
 app.use(helmet());
 
-// Configure o Express para confiar nos cabeçalhos X-Forwarded-*
 app.set('trust proxy', 1);
 
 const limiter = rateLimit({
@@ -140,6 +139,7 @@ app.post('/page-loaded', async (req, res) => {
 
 app.use(express.static(path.join(__dirname, 'public'), { maxAge: '1d' }));
 app.use('/admin', require('./routes/admin'));
+app.use((req, res, next) => {res.status(404).sendFile(path.join(__dirname, 'public', '404.html'));});
 
 app.listen(port, () => {
     console.log(`Server is running at http://localhost:${port}`);
