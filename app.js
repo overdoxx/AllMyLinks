@@ -138,7 +138,7 @@ app.post('/page-loaded', async (req, res) => {
     }
 });
 
-app.use('/pinkpussyhardkink', express.static(path.join(__dirname, 'public'), { maxAge: '1d' }));
+app.use(express.static(path.join(__dirname, 'public'), { maxAge: '1d' }));
 app.use('/admin', require('./routes/admin'));
 
 app.listen(port, () => {
