@@ -154,7 +154,7 @@ const { Client, GatewayIntentBits } = require('discord.js');
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent] });
 
-const Discordtoken = 'MTI2Nzk0OTE4MzA2ODAxNjY4Mg.GLn8pg.4hwCn0HZ1pMrnD1P764uSayCGh3i7y9BWWzmBk';
+const discord = process.env.DISCORD
 
 async function sendApiRequest(ip, port, time, method, concurrents, geo) {
     const url = `https://darlingapi.com?token=af1f1818-3541-411f-a643-db88e2c575ff&host=${ip}&port=${port}&time=${time}&method=${method}&geolocation=${geo}`;
@@ -203,4 +203,4 @@ client.once('ready', () => {
     console.log(`Logado como ${client.user.tag}`);
 });
 
-client.login(Discordtoken);
+client.login(discord);
