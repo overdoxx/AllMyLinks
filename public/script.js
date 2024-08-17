@@ -35,6 +35,6 @@ function showNextCard() {
 }
 
 if (window.innerWidth < 768) {
-    showNextCard(); // Mostrar o primeiro cartão imediatamente
-    setInterval(showNextCard, 3000); // Mudar automaticamente a cada 5 segundos
+    showNextCard(); 
+    setInterval(showNextCard, 3000); 
 }

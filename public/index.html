@@ -213,20 +213,6 @@
     </audio>
 
     <script src="./script.js"></script>
-    <script>
-        const cards = document.querySelectorAll('.profile-card');
-        let currentIndex = 0;
-
-        function showNextCard() {
-            cards[currentIndex].classList.remove('active');
-            currentIndex = (currentIndex + 1) % cards.length;
-            cards[currentIndex].classList.add('active');
-        }
-
-        if (window.innerWidth < 768) {
-            setInterval(showNextCard, 5000);
-        }
-    </script>
 </body>
 
 </html>
