@@ -23,3 +23,18 @@ document.addEventListener('DOMContentLoaded', function() {
     const audioPlayer = document.getElementById('audioPlayer');
     audioPlayer.volume = 0.1; 
 });
+
+const cards = document.querySelectorAll('.profile-card');
+let currentIndex = 0;
+
+function showNextCard() {
+    cards.forEach((card, index) => {
+        card.style.display = (index === currentIndex) ? 'block' : 'none';
+    });
+    currentIndex = (currentIndex + 1) % cards.length;
+}
+
+if (window.innerWidth < 768) {
+    showNextCard(); // Mostrar o primeiro cartão imediatamente
+    setInterval(showNextCard, 3000); // Mudar automaticamente a cada 5 segundos
+}

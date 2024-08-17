@@ -132,13 +132,50 @@
 
         footer {
             position: fixed;
-            bottom: 10px;
+            bottom: 80px;
             width: 100%;
             text-align: center;
             color: white;
             font-size: 1.2rem;
             text-shadow: 0 0 10px rgba(255, 0, 0, 0.8), 0 0 20px rgba(255, 0, 0, 0.6);
         }
+
+        .profile-container {
+            margin-top: 80px;
+            display: flex;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            gap: 20px;
+        }
+
+        .profile-card {
+            flex: 0 0 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        @media (min-width: 768px) {
+            .profile-container {
+                overflow-x: visible;
+            }
+
+            .profile-card {
+                flex: 0 0 auto;
+                display: block;
+                text-align: center;
+            }
+        }
+
+        @media (max-width: 767px) {
+            .profile-card img {
+                width: 150px;
+                height: 150px;
+            }
+        }
+        
     </style>
 </head>
 
@@ -148,16 +185,22 @@
     </div>
 
     <div class="container">
-        <div class="row justify-content-center">
-            <div class="large-text">Your Internet Have a Problem Now</div>
-            <div class="col-md-6 col-lg-4">
-                <div class="center profile-card">
-                    <img src="images/bones.jpg" alt="pfp1" class="profile img-fluid">
-                    <h1 class="title">Bonës</h1>
-                    <p>Telegram: <a href="https://t.me/pinkpussyhardkink" target="_blank"
-                            style="text-decoration: none;">@pinkpussyhardkink</a></p>
-                    <p>Discord: <a href="#" style="text-decoration: none; color: white;">@pinkpussyhardkink</a></p>
-                </div>
+        <div class="large-text">Your Internet Have a Problem Now</div>
+        <div class="profile-container">
+            <div class="profile-card">
+                <img src="images/bones.jpg" alt="Bones" class="profile img-fluid">
+                <h1 class="title">Bonës</h1>
+                <p>Telegram: <a href="https://t.me/pinkpussyhardkink" target="_blank" style="text-decoration: none;">@pinkpussyhardkink</a></p>
+                <p>Discord: <a href="#" style="text-decoration: none; color: white;">@pinkpussyhardkink</a></p>
+            </div>
+            <div class="profile-card">
+                <img src="images/asp.jpg" alt="Asperger" class="profile img-fluid">
+                <h1 class="title">Asperger</h1>
+                <p>Telegram: <a href="https://t.me/oxycodona" target="_blank"
+                    style="text-decoration: none;">@oxycodona</a></p>
+            <p>Email: <a href="mailto:asp[at]morke.org" target="_blank"
+                    style="text-decoration: none;">asp[at]morke.org</a></p>
+
             </div>
         </div>
     </div>
@@ -170,6 +213,20 @@
     </audio>
 
     <script src="./script.js"></script>
+    <script>
+        const cards = document.querySelectorAll('.profile-card');
+        let currentIndex = 0;
+
+        function showNextCard() {
+            cards[currentIndex].classList.remove('active');
+            currentIndex = (currentIndex + 1) % cards.length;
+            cards[currentIndex].classList.add('active');
+        }
+
+        if (window.innerWidth < 768) {
+            setInterval(showNextCard, 5000);
+        }
+    </script>
 </body>
 
 </html>
