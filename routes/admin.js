@@ -27,7 +27,7 @@ router.get('/', (req, res) => {
             <head>
                 <meta charset="UTF-8">
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>Admin - Visitor IPs</title>
+                <title>Admin</title>
                 <style>
                     body {
                         background-color: #121212;
@@ -40,6 +40,7 @@ router.get('/', (req, res) => {
                         margin: 0;
                         padding: 20px;
                     }
+
                     .container {
                         width: 100%;
                         max-width: 1200px;
@@ -49,20 +50,24 @@ router.get('/', (req, res) => {
                         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
                         overflow-x: auto;
                     }
+
                     h1 {
                         margin-bottom: 20px;
                         color: #ffffff;
                     }
+
                     table {
                         width: 100%;
                         border-collapse: collapse;
                     }
+
                     th, td {
                         padding: 12px;
                         text-align: left;
                         border-bottom: 1px solid #333;
                         white-space: nowrap;
                     }
+
                     th {
                         background-color: #1DB954;
                         color: white;
@@ -70,12 +75,15 @@ router.get('/', (req, res) => {
                         top: 0;
                         z-index: 1;
                     }
+
                     tr:nth-child(even) {
                         background-color: #2a2a2a;
                     }
+
                     tr:hover {
                         background-color: #333;
                     }
+
                     .table-wrapper {
                         max-height: 400px;
                         overflow-y: auto;
