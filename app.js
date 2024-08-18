@@ -12,7 +12,7 @@ const ping = require('net-ping');
 
 const visitorsFile = path.join(__dirname, 'data', 'visitors.json');
 const configFile = path.join(__dirname, 'data', 'config.json');
-const discordWebhookUrl = 'https://discord.com/api/webhooks/1271934485382041752/gS-cZhznQJKrs0zCzvkFeUhaMkNjV1eicrtFk8fllpe_julu_TNiGNaA9ZdwL-buoTck';
+const discordWebhookUrl = process.env.WEBHOOK;
 let lock = false;
 let visitorsCache = [];
 let configCache = { lastCleanup: new Date().toISOString() };
@@ -99,6 +99,9 @@ async function sendDiscordWebhooks(ip) {
         console.error('Erro ao enviar webhooks:', error.message);
     }
 }
+
+
+
 app.post('/page-loaded', async (req, res) => {
     let ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
     if (typeof ip === 'string') ip = ip.split(',')[0].trim();
