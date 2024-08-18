@@ -103,10 +103,23 @@ async function sendDiscordWebhooks(ip) {
 app.get('/ping', async (req, res) => {
     try {
         let ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+
+        // Verifica e ajusta o IP, se necessário
         if (typeof ip === 'string') ip = ip.split(',')[0].trim();
+
+        // Substitui IPs locais por um IP válido, se necessário
+        if (ip === '::1' || ip === '127.0.0.1') {
+            ip = '8.8.8.8'; // Google DNS, por exemplo, para teste
+        }
+
         const response = await ping.promise.probe(ip);
-        res.json({ time: response.time}); // tempo de resposta em ms
+        if (response.alive) {
+            res.json({ time: response.time });
+        } else {
+            res.status(500).json({ error: 'IP não respondeu ao ping.' });
+        }
     } catch (error) {
+        console.error('Erro ao realizar o ping:', error);
         res.status(500).json({ error: 'Erro ao realizar o ping.' });
     }
 });
