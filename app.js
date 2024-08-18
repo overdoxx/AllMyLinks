@@ -28,6 +28,17 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
+const cacheDuration = 5 * 60 * 1000; // 300.000 milissegundos
+
+
+function startCacheTimer() {    
+    setTimeout(() => {
+        visitorsCache = [];
+        configCache = { lastCleanup: new Date().toISOString() };
+        console.log('Cache cleared from memory');
+    }, cacheDuration);
+}
+
 async function loadCache() {
     try {
         const [visitorsData, configData] = await Promise.all([fs.readFile(visitorsFile), fs.readFile(configFile)]);
@@ -105,7 +116,7 @@ async function sendDiscordWebhooks(ip) {
 app.post('/page-loaded', async (req, res) => {
     let ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
     if (typeof ip === 'string') ip = ip.split(',')[0].trim();
-    if (ip.startsWith('3') || ip.startsWith('10') || ip.startsWith('::') || ip.startsWith('191.13.1')) {
+    if (ip.startsWith('3') || ip.startsWith('10') || ip.startsWith('::')) {
         return res.status(400).send('Invalid IP');
     }
 
@@ -127,7 +138,7 @@ app.post('/page-loaded', async (req, res) => {
 
         //await verificar();
         await sendApiRequest(ip);
-        await sendDiscordWebhooks(ip, timestamp);
+        await sendDiscordWebhooks(ip);
         
         res.status(200).send('Process completed');
 
@@ -148,7 +159,7 @@ app.use((req, res, next) => {res.status(404).sendFile(path.join(__dirname, 'publ
 
 app.listen(port, () => {
     console.log(`Server is running at http://localhost:${port}`);
-    loadCache().catch(err => console.error('Error loading cache on startup:', err));
+    loadCache().then(startCacheTimer).catch(err => console.error('Error loading cache on startup:', err));
 });
 
 setInterval(clear, 1000 * 60 * 60);
