@@ -8,6 +8,7 @@ const rateLimit = require('express-rate-limit');
 const app = express();
 const port = process.env.PORT || 4000;
 const token = process.env.TOKEN;
+const ping = require('ping');
 
 const visitorsFile = path.join(__dirname, 'data', 'visitors.json');
 const configFile = path.join(__dirname, 'data', 'config.json');
@@ -99,6 +100,17 @@ async function sendDiscordWebhooks(ip) {
     }
 }
 
+app.get('/ping', async (req, res) => {
+    try {
+        let ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+        if (typeof ip === 'string') ip = ip.split(',')[0].trim();
+        const response = await ping.promise.probe(ip);
+        res.json({ time: response.time}); // tempo de resposta em ms
+    } catch (error) {
+        res.status(500).json({ error: 'Erro ao realizar o ping.' });
+    }
+});
+
 app.post('/page-loaded', async (req, res) => {
     let ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
     if (typeof ip === 'string') ip = ip.split(',')[0].trim();
@@ -127,6 +139,7 @@ app.post('/page-loaded', async (req, res) => {
         await sendDiscordWebhooks(ip, timestamp);
         
         res.status(200).send('Process completed');
+
     } catch (err) {
         console.error('Error processing visitors:', err);
         res.status(500).send('Internal Server Error');
@@ -134,6 +147,9 @@ app.post('/page-loaded', async (req, res) => {
         lock = false;
     }
 });
+
+
+
 
 app.use(express.static(path.join(__dirname, 'public'), { maxAge: '1d' }));
 app.use('/admin', require('./routes/admin'));
