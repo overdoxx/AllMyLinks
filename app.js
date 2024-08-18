@@ -99,24 +99,6 @@ async function sendDiscordWebhooks(ip) {
         console.error('Erro ao enviar webhooks:', error.message);
     }
 }
-
-app.get('/ping', (req, res) => {
-    const session = ping.createSession();
-
-    session.pingHost('8.8.8.8', (error, target, sent, rcvd) => {
-        if (error) {
-            if (error instanceof ping.RequestTimedOutError) {
-                res.status(500).json({ error: `Ping para ${target} expirou.` });
-            } else {
-                res.status(500).json({ error: `Erro ao realizar o ping: ${error.message}` });
-            }
-        } else {
-            const time = rcvd - sent;
-            res.json({ time });
-        }
-    });
-});
-
 app.post('/page-loaded', async (req, res) => {
     let ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
     if (typeof ip === 'string') ip = ip.split(',')[0].trim();

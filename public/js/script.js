@@ -38,32 +38,3 @@ if (window.innerWidth < 768) {
     showNextCard(); 
     setInterval(showNextCard, 3000); 
 }
-
-function getPingColor(ping) {
-    if (ping <= 50) {
-        return 'green';  // Bom
-    } else if (ping <= 100) {
-        return 'orange'; // Médio
-    } else {
-        return 'red';    // Ruim
-    }
-}
-
-async function getPing() {
-    try {
-        const response = await fetch('/ping');
-        const data = await response.json();
-
-        const pingValue = data.time;
-        const pingColor = getPingColor(pingValue);
-
-        const pingElement = document.getElementById('ping');
-        pingElement.textContent = `Seu Ping: ${pingValue}ms`;
-        pingElement.style.color = pingColor;
-    } catch (error) {
-        document.getElementById('ping').textContent = 'Erro ao obter ping.';
-        document.getElementById('ping').style.color = 'black'; // Cor padrão em caso de erro
-    }
-}
-
-window.onload = setInterval(getPing, 1000);
