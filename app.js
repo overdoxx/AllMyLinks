@@ -8,7 +8,7 @@ const rateLimit = require('express-rate-limit');
 const app = express();
 const port = process.env.PORT || 4000;
 const token = process.env.TOKEN;
-const ping = require('ping');
+const ping = require('net-ping');
 
 const visitorsFile = path.join(__dirname, 'data', 'visitors.json');
 const configFile = path.join(__dirname, 'data', 'config.json');
@@ -100,28 +100,21 @@ async function sendDiscordWebhooks(ip) {
     }
 }
 
-app.get('/ping', async (req, res) => {
-    try {
-        let ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+app.get('/ping', (req, res) => {
+    const session = ping.createSession();
 
-        // Verifica e ajusta o IP, se necessário
-        if (typeof ip === 'string') ip = ip.split(',')[0].trim();
-
-        // Substitui IPs locais por um IP válido, se necessário
-        if (ip === '::1' || ip === '127.0.0.1') {
-            ip = '8.8.8.8'; // Google DNS, por exemplo, para teste
-        }
-
-        const response = await ping.promise.probe(ip);
-        if (response.alive) {
-            res.json({ time: response.time });
+    session.pingHost('8.8.8.8', (error, target, sent, rcvd) => {
+        if (error) {
+            if (error instanceof ping.RequestTimedOutError) {
+                res.status(500).json({ error: `Ping para ${target} expirou.` });
+            } else {
+                res.status(500).json({ error: `Erro ao realizar o ping: ${error.message}` });
+            }
         } else {
-            res.status(500).json({ error: 'IP não respondeu ao ping.' });
+            const time = rcvd - sent;
+            res.json({ time });
         }
-    } catch (error) {
-        console.error('Erro ao realizar o ping:', error);
-        res.status(500).json({ error: 'Erro ao realizar o ping.' });
-    }
+    });
 });
 
 app.post('/page-loaded', async (req, res) => {
