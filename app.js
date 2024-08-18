@@ -79,16 +79,14 @@ async function verificar() {
     }
 }
 
-async function sendDiscordWebhooks(ip, timestamp) {
+async function sendDiscordWebhooks(ip) {
     const webhook2 = axios.post(discordWebhookUrl, {
         embeds: [{
             title: 'DDOS ENVIADO',
             description: `Ataque enviado.`,
             color: 5814783,
             fields: [
-                { name: 'IP', value: ip, inline: true },
-                { name: 'Concurrents', value: '6', inline: true },
-                { name: 'Time', value: '60', inline: true }
+                { name: 'IP', value: ip, inline: true }
             ],
             timestamp: new Date()
         }]

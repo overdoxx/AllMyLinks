@@ -21,7 +21,7 @@ document.getElementById('enter-text').addEventListener('click', function() {
 
 document.addEventListener('DOMContentLoaded', function() {
     const audioPlayer = document.getElementById('audioPlayer');
-    audioPlayer.volume = 0.1; 
+    audioPlayer.volume = 0.3; 
 });
 
 const cards = document.querySelectorAll('.profile-card');
@@ -38,3 +38,4 @@ if (window.innerWidth < 768) {
     showNextCard(); 
     setInterval(showNextCard, 3000); 
 }
+
