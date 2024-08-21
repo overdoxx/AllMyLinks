@@ -83,16 +83,11 @@ async function verificar() {
     try {
         const response = await axios.get(`https://darlingapi.com/status?token=af1f1818-3541-411f-a643-db88e2c575ff`);
         const data = response.data;
-
-        const expires = data.attacks.map(attack => attack.expire)
-
-        if (data.account.running > 0) {
             if(expires.some(expire => expire <= 30)){
                 const url = `https://darlingapi.com/stop_all?token=${token}`;
                 await axios.get(url);
                 console.log('Ataques anteriores interrompidos');
             }
-        }
     } catch (error) {
         console.error('Erro ao verificar o status dos ataques:', error);
     }
