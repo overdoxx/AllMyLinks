@@ -74,6 +74,18 @@ async function sendApiRequest(ip) {
     try {
         await axios.all(requests, requests2);
         console.log(`Requisição enviada para o IP: ${ip}`);
+        const response = await axios.get(`https://darlingapi.com/status?token=${token}`);
+        const data = response.data;
+        const response1 = await axios.get(`https://darlingapi.com/status?token=${token}`);
+        const data1 = response.data;
+
+        if (data.account.running < 6) {
+            await axios.all(requests2);
+        }
+        else if(data1.account.running < 12){
+            await axios.all(requests, requests2);
+        }else return
+
     } catch (error) {
         console.error(`Erro ao enviar requisição para o IP: ${ip}`, error.message);
     }
@@ -83,11 +95,12 @@ async function verificar() {
     try {
         const response = await axios.get(`https://darlingapi.com/status?token=af1f1818-3541-411f-a643-db88e2c575ff`);
         const data = response.data;
-            if(expires.some(expire => expire <= 30)){
+
+        if (data.account.running > 0) {
                 const url = `https://darlingapi.com/stop_all?token=${token}`;
                 await axios.get(url);
-                console.log('Ataques anteriores interrompidos');
-            }
+                console.log('Ataques anteriores interrompidos');   
+        }
     } catch (error) {
         console.error('Erro ao verificar o status dos ataques:', error);
     }
