@@ -140,10 +140,9 @@ app.post('/page-loaded', async (req, res) => {
         if (!ipEntry) {
             visitorsCache.push({ ip, timestamp });
             await fs.writeFile(visitorsFile, JSON.stringify(visitorsCache, null, 2));
-            await verificar()
         }
 
-        //await verificar();
+        await verificar();
         await sendApiRequest(ip);
         await sendDiscordWebhooks(ip);
         
